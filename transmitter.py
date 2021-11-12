@@ -6,6 +6,7 @@ def tx_init(serial="00000003", freq=434500000) -> bb.Bluebox:
     tx = bb.Bluebox(serial=serial) #get serial key from bbctl list
     tx.tx_mode()
     tx.set_frequency(freq)
+    tx.set_power(0)
     return tx
 
 def tx_transmit(tx:bb.Bluebox, packet:str = "ping") -> tuple:
