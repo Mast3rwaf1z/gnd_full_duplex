@@ -10,6 +10,11 @@ import codecs
 import getpass
 import socket
 
+txThread = None
+rxThread = None
+
+fechandler = fec.PacketHandler(key="aausat_secret")
+
 class dualBB_handler():
     def __init__(self, txserial="00000003", rxserial="00000008", rx_freq=431000000, tx_freq=439000000, timeout=10000, modindex=1, bitrate=2400, ifbw=1, power=0):
         self.tx = bb.Bluebox(serial=txserial)
@@ -27,13 +32,12 @@ class dualBB_handler():
         self.tx.set_ifbw(ifbw)
         self.HDBB = None
         
-        self.fechandler = fec.PacketHandler(key="aausat_secret")
 
 
     def transmit(self, packet:str="ping", tx=None):
         if tx == None:
             tx = self.tx
-        data = self.fechandler.frame(binascii.hexlify(bytes(packet, "utf-8")))
+        data = fechandler.frame(binascii.hexlify(bytes(packet, "utf-8")))
         tx.transmit(data)
         return packet
     
@@ -44,7 +48,7 @@ class dualBB_handler():
         while data is None:
             data,rssi,freq = rx.receive()
         try:
-            packet,_,_ = self.fechandler.deframe(data)
+            packet,_,_ = fechandler.deframe(data)
             return packet
         except:
             print("ERROR: failed to get a valid packet")
@@ -63,16 +67,25 @@ class dualBB_handler():
         txThread.stop()
         rxThread.stop()
         print("Successfully enabled half duplex!")
+        HD_thead = HDThread(self.HDBB)
         return True
-    
-    def halfDuplexToggle(self):
-        #to be mccd toggleable tranceiving mode
-        pass
+
+class HDThread(threading.Thread):
+    def __init__(self, HDBB):
+        threading.Thread.__init__(self)
+        self.HDBB = HDBB
+        time.sleep(4)
+        self.start()
+    def run(self):
+        print("Half duplex thread started")
+        while True:
+            self.HDBB.tx_mode()
+            print("data sent")
+            self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("ping", "utf-8"))))
+            self.HDBB.receive()
+            time.sleep(2)
 
 
-    def halfDuplex(self):
-        self.transmit("half duplex first ping", tx=self.HDBB)
-        self.receive(rx=self.HDBB)
 
 
 class tx_thread(threading.Thread):
@@ -88,7 +101,7 @@ class tx_thread(threading.Thread):
             self.BBH.transmit(self.packet)
             time.sleep(5)
         print("full duplex transmission ended")
-    def stop():
+    def stop(self):
         self.transmitting = False
 
 class rx_thread(threading.Thread):
@@ -104,13 +117,17 @@ class rx_thread(threading.Thread):
             packetcounter += 1
             packet = self.BBH.receive()
             if packet is not None:
-                print(str(packetcounter) + " " + bytes.decode(binascii.unhexlify(packet), "utf-8"))
+                decoded = bytes.decode(binascii.unhexlify(packet), "utf-8")
+                if decoded == "rxoff":
+                    self.BBH.setHalfDuplex(self.BBH.rx.get_frequency(), self, txThread)
+                elif decoded == "txoff":
+                    self.BBH.setHalfDuplex(self.BBH.tx.get_frequency(), self, txThread)
+                print(str(packetcounter) + " " + decoded)
         print("full duplex receiving ended")
-    def stop():
+    def stop(self):
         self.receiving = False
 
-
 if __name__ == "__main__":
-    BBH = dualBB_handler(power=8) #leave blank for default configuration
-    txthread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
-    rxthread = rx_thread(BBH)
+    BBH = dualBB_handler(power=0) #leave blank for default configuration
+    txThread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
+    rxThread = rx_thread(BBH)
