@@ -8,6 +8,7 @@ rx:bb.Bluebox
 fechandler = fec.PacketHandler(key="test")
 
 
+<<<<<<< HEAD
 def rx_init(serial="dead0024", freq=434500000, mod=1, timeout=10000, bitrate=9200) -> bb.Bluebox:
     rx = bb.Bluebox(serial=serial)
     rx.rx_mode()
@@ -25,6 +26,17 @@ def receive(self:bb.Bluebox):
     packet,_,_ = fechandler.deframe(data)
     return packet
 
+=======
+def rx_init(serial="00000002", freq=434500000) -> bb.Bluebox:
+    rx = bb.Bluebox(serial=serial)
+    rx.rx_mode()
+    rx.set_frequency(freq)
+    rx.set_modindex(1)
+    return rx
+
+def receive(self:bb.Bluebox):
+    return self.receive()
+>>>>>>> c4a4ed47811072ac550f8860fdcf6aaf0833a4d4
 
 if __name__ == "__main__":
     rx = rx_init(bitrate=2400)
