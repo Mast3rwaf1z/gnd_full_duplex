@@ -10,3 +10,5 @@ def rx_init(serial="", freq=434500000) -> bb.Bluebox:
 
 if __name__ == "__main__":
     rx = rx_init()
+    while True:
+        rx.receive()
