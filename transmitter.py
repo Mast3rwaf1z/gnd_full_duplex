@@ -8,6 +8,10 @@ def tx_init(serial="", freq=434500000) -> bb.Bluebox:
     tx.set_frequency(freq)
     return tx
 
+def tx_transmit(tx:bb.Bluebox, packet:input("input: ")) -> str:
+    tx.transmit(bytes(packet, "utf-8"))
+    return packet
+
 if __name__ == "__main__":
     tx = tx_init()
     while True:
