@@ -5,7 +5,7 @@ import binascii
 
 
 rx:bb.Bluebox
-fechandler = fec.PacketHandler(key="test")
+fechandler = fec.PacketHandler(key="aausat_secret")
 
 def rx_init(serial="dead0024", freq=434500000, mod=1, timeout=10000, bitrate=9200) -> bb.Bluebox:
     rx = bb.Bluebox(serial=serial)
@@ -25,7 +25,7 @@ def receive(self:bb.Bluebox):
     return packet
 
 if __name__ == "__main__":
-    rx = rx_init(bitrate=2400, serial="00000008")
+    rx = rx_init(bitrate=2400)
     while True:
         packet = receive(rx)
         if packet is not None:

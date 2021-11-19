@@ -36,7 +36,7 @@ class dualBB_handler():
             return packet
         except:
             print(data)
-            receive(self)
+            self.receive()
 
 class tx_thread(threading.Thread):
     def __init__(self, BBH:dualBB_handler):
