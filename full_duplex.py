@@ -97,9 +97,11 @@ class HDThread(threading.Thread):
         HMAC_LEN = 2
         print("Half duplex thread started")
         while True:
-            if self.tqueue.size > 0:
+            if self.tq.size > 0:
                 self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes(self.tq.pull(), "utf-8"))))
-            print("data sent")
+                print("data sent")
+            else:
+                print("queue empty")
             data = None
             counter = 0
             while data is None:
@@ -133,8 +135,7 @@ class tx_thread(threading.Thread):
         print("transmit thread started")
     def run(self):
         while self.transmitting:
-            self.BBH.transmit(self.packet)
-            time.sleep(5)
+            self.BBH.transmit()
         print("full duplex transmission ended")
     def stop(self):
         self.transmitting = False
@@ -162,7 +163,7 @@ class rx_thread(threading.Thread):
         self.receiving = False
 
 if __name__ == "__main__":
-    BBH = dualBB_handler(power=4) #leave blank for default configuration
+    BBH = dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4) #leave blank for default configuration
     txThread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
     rxThread = rx_thread(BBH)
     while True:

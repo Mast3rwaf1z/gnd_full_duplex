@@ -5,19 +5,20 @@ import full_duplex as fd
 BBH:fd.dualBB_handler = None
 def exec_fd():
     try:
-        BBH = fd.dualBB_handler()
-        txThread = fd.tx_thread(BBH)
-        rxThread = fd.rx_thread(BBH)
+        global BBH
+        BBH = fd.dualBB_handler(txserial="00000008", rxserial="ffffffff", power=8)
+        fd.txThread = fd.tx_thread(BBH)
+        fd.rxThread = fd.rx_thread(BBH)
         textbox.config(text="successfully initialized BBH", fg="green")
     except Exception as ex:
         textbox.config(text="ERROR: failed to initialize BBH, is two blueboxes plugged in and initialized correctly?", fg="red")
         print(e)
 
 def queue():
+    global BBH
     if BBH is not None:
         BBH.tq.put(e.get())
-        print(BBH.tq.size)
-        textbox.config(text="successfully queued item", fg="red")
+        textbox.config(text="successfully queued item", fg="green")
     else:
         textbox.config(text="ERROR: failed to queue item, is BBH initialized?", fg="red")
 
