@@ -13,10 +13,10 @@ import socket
 txThread = None
 rxThread = None
 
-fechandler = fec.PacketHandler(key="aausat_secret")
+fechandler = fec.PacketHandler(key="aausat")
 
 class dualBB_handler():
-    def __init__(self, txserial="00000003", rxserial="00000008", rx_freq=431000000, tx_freq=439000000, timeout=10000, modindex=1, bitrate=2400, ifbw=1, power=0):
+    def __init__(self, txserial="00000003", rxserial="ffffffff", rx_freq=431000000, tx_freq=431200000, timeout=10000, modindex=1, bitrate=2400, ifbw=1, power=0):
         self.tx = bb.Bluebox(serial=txserial)
         self.rx = bb.Bluebox(serial=rxserial)
         self.tx.tx_mode()
@@ -54,19 +54,13 @@ class dualBB_handler():
             print("ERROR: failed to get a valid packet")
             self.receive()
 
-    def setHalfDuplex(self, recvFreq, txThread, rxThread):
-        if recvFreq == self.rx.get_frequency():
-            self.HDBB = self.rx
-        elif recvFreq == self.tx.get_frequency():
-            self.HDBB = self.tx
-        else:
-            print("ERROR: set half duplex method failed!")
-            return False
-        self.HDBB.power = self.tx.get_power()
-        self.HDBB.timeout = self.rx.timeout
+    def setHalfDuplex(self, power=0):
+        self.HDBB = self.rx
+        self.HDBB.set_power(power)
         txThread.stop()
         rxThread.stop()
         print("Successfully enabled half duplex!")
+        self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("hdack", "utf-8"))))
         HD_thead = HDThread(self.HDBB)
         return True
 
@@ -79,10 +73,26 @@ class HDThread(threading.Thread):
     def run(self):
         print("Half duplex thread started")
         while True:
-            self.HDBB.tx_mode()
+            self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("test", "utf-8"))))
             print("data sent")
-            self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("ping", "utf-8"))))
-            self.HDBB.receive()
+            data = None
+            counter = 0
+            while data is None:
+                counter += 1
+                if counter > 3:
+                    break
+                data,_,_ = self.HDBB.receive()
+            if counter > 3:
+                continue
+            try:
+                packet,_,_ = fechandler.decode(data)
+            except Exception as e:
+                print(e)
+
+            print("received packet")
+            if packet is not None:
+                print(packet)
+                print(bytes.decode(binascii.unhexlify(packet[:len(packet)-2]), "utf-8"))
             time.sleep(2)
 
 
@@ -118,16 +128,15 @@ class rx_thread(threading.Thread):
             packet = self.BBH.receive()
             if packet is not None:
                 decoded = bytes.decode(binascii.unhexlify(packet), "utf-8")
-                if decoded == "rxoff":
-                    self.BBH.setHalfDuplex(self.BBH.rx.get_frequency(), self, txThread)
-                elif decoded == "txoff":
-                    self.BBH.setHalfDuplex(self.BBH.tx.get_frequency(), self, txThread)
+                if decoded == "sethd":
+                    self.BBH.setHalfDuplex()
+
                 print(str(packetcounter) + " " + decoded)
         print("full duplex receiving ended")
     def stop(self):
         self.receiving = False
 
 if __name__ == "__main__":
-    BBH = dualBB_handler(power=0) #leave blank for default configuration
+    BBH = dualBB_handler(power=4) #leave blank for default configuration
     txThread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
     rxThread = rx_thread(BBH)
