@@ -64,7 +64,7 @@ class dualBB_handler():
             self.receive() #recursion to continue receiving
 
     #if a package containing the signal to switch to half duplex is received, this function is run, it will terminate the transmitting and receiving threads and start one that does those two operations
-    def set_half_duplex(self, power=0):
+    def set_half_duplex(self, power=4):
         self.HDBB = self.rx     #the bluebox used is fixed to the one that would require the least reconfiguration
         self.HDBB.set_power(power)
         txThread.stop()
@@ -140,7 +140,10 @@ class rx_thread(threading.Thread):
             packetcounter += 1
             packet = self.BBH.receive()
             if packet is not None:
-                decoded = bytes.decode(binascii.unhexlify(packet), "utf-8")
+                try:
+                    decoded = bytes.decode(binascii.unhexlify(codecs.decode(packet)))
+                except:
+                    decoded = bytes.decode(binascii.unhexlify(codecs.decode(packet[:len(packet)-2])))
                 if decoded == "sethd":
                     self.BBH.set_half_duplex()
 

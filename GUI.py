@@ -7,7 +7,7 @@ BBH:fd.dualBB_handler = None
 def exec_fd():
     try:
         global BBH
-        BBH = fd.dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4, bitrate=4800)
+        BBH = fd.dualBB_handler(txserial="ffffffff", rxserial="00000008", power=4, bitrate=4800)
         fd.txThread = fd.tx_thread(BBH)
         fd.rxThread = fd.rx_thread(BBH)
         textbox.config(text="successfully initialized BBH", fg="green")
@@ -19,6 +19,8 @@ def queue_text():
     global BBH
     if BBH is not None:
         BBH.tq.put(e.get())
+        #for i in range(10):
+            #BBH.tq.put("test\n")
         textbox.config(text="successfully queued item", fg="green")
     else:
         textbox.config(text="ERROR: failed to queue item, is BBH initialized?", fg="red")
