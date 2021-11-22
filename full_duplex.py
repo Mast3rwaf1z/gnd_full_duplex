@@ -46,7 +46,6 @@ class dualBB_handler():
         if self.tq.size > 0:
             data = encoding.utf8encode(self.tq.pull())
             tx.transmit(data)
-        time.sleep(1)
     
     #function to receive data from a satellite
     def receive(self, rx=None):
