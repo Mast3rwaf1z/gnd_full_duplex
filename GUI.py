@@ -7,7 +7,7 @@ BBH:fd.dualBB_handler = None
 def exec_fd():
     try:
         global BBH
-        BBH = fd.dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4, bitrate=9600)
+        BBH = fd.dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4, bitrate=4800)
         fd.txThread = fd.tx_thread(BBH)
         fd.rxThread = fd.rx_thread(BBH)
         textbox.config(text="successfully initialized BBH", fg="green")
@@ -83,7 +83,7 @@ queue_file_button.pack(side=tk.LEFT)
 get_queue_button = tk.Button(frame, text="Get Queue", command=get_queue)
 get_queue_button.pack(side=tk.LEFT)
 
-stop_transmission_request = tk.Button(frame, text="Stop transmission", command=stop_transmission)
+stop_transmission_request = tk.Button(frame, text="Stop satellite transmission", command=stop_transmission)
 stop_transmission_request.pack(side=tk.LEFT)
 
 

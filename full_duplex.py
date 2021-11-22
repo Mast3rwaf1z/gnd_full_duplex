@@ -35,6 +35,7 @@ class dualBB_handler():
         self.tx.set_modindex(modindex)
         self.rx.set_modindex(modindex)
         self.tx.set_ifbw(ifbw)
+        self.rx.set_ifbw(ifbw)
         self.HDBB:bb.Bluebox = None
         self.tq = queue()
         
