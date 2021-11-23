@@ -7,13 +7,14 @@ import binascii
 rx:bb.Bluebox
 fechandler = fec.PacketHandler(key="aausat_secret")
 
-def rx_init(serial="dead0024", freq=434500000, mod=1, timeout=10000, bitrate=9200) -> bb.Bluebox:
+def rx_init(serial="dead0024", freq=439000000, mod=1, timeout=10000, bitrate=2400, ifbw=1) -> bb.Bluebox:
     rx = bb.Bluebox(serial=serial)
     rx.rx_mode()
     rx.set_frequency(freq)
     rx.set_modindex(mod)
     rx.timeout = timeout
     rx.set_bitrate(bitrate)
+    rx.set_ifbw(ifbw)
     return rx
 
 def receive(self:bb.Bluebox):
@@ -25,8 +26,10 @@ def receive(self:bb.Bluebox):
     return packet
 
 if __name__ == "__main__":
-    rx = rx_init(bitrate=2400)
+    rx = rx_init()
+    packetcounter = 0
     while True:
         packet = receive(rx)
         if packet is not None:
-            print(bytes.decode(binascii.unhexlify(packet), "utf-8"))
+            packetcounter += 1
+            print(str(packetcounter) + " " + bytes.decode(binascii.unhexlify(packet), "utf-8"))

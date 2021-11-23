@@ -1,4 +1,6 @@
 import codecs
+import socket
+import getpass
 import bluebox as bb
 import fec
 import binascii
@@ -20,7 +22,7 @@ def transmit(tx:bb.Bluebox, packet:str = "ping") -> tuple:
     return packet
 
 if __name__ == "__main__":
-    tx = tx_init(power=13)
+    tx = tx_init(power=13, freq=431000000)
     while True:
-        transmit(tx, "test2")
+        transmit(tx, "ping from " + getpass.getuser() + '@' + socket.gethostname() +" using "+ tx.serial)
         time.sleep(5)
