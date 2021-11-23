@@ -109,6 +109,7 @@ class rx_thread(threading.Thread):
     def stop():
         self.receiving = False
 
+
 if __name__ == "__main__":
     BBH = dualBB_handler(power=8) #leave blank for default configuration
     txthread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
