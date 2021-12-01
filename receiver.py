@@ -2,12 +2,13 @@ import bluebox as bb
 import fec
 import codecs
 import binascii
+import threading
 
 
 rx:bb.Bluebox
-fechandler = fec.PacketHandler(key="aausat_secret")
+fechandler = fec.PacketHandler(key="aausat")
 
-def rx_init(serial="dead0024", freq=439000000, mod=1, timeout=10000, bitrate=2400, ifbw=1) -> bb.Bluebox:
+def rx_init(serial="dead0024", freq=439000000, mod=1, timeout=10000, bitrate=2400, ifbw=1, power=8) -> bb.Bluebox:
     rx = bb.Bluebox(serial=serial)
     rx.rx_mode()
     rx.set_frequency(freq)
@@ -15,6 +16,7 @@ def rx_init(serial="dead0024", freq=439000000, mod=1, timeout=10000, bitrate=240
     rx.timeout = timeout
     rx.set_bitrate(bitrate)
     rx.set_ifbw(ifbw)
+    rx.set_power(power)
     return rx
 
 def receive(self:bb.Bluebox):
@@ -25,11 +27,33 @@ def receive(self:bb.Bluebox):
     packet,_,_ = fechandler.deframe(data)
     return packet
 
+class rx_thread(threading.Thread):
+    def __init__(self, rx:bb.Bluebox):
+        threading.Thread.__init__(self)
+        self.receiving = True
+        self.rx = rx
+        self.start()
+    def run(self):
+        packetcounter = 0
+        while self.receiving:
+            try:
+                packet = receive(self.rx)
+            except Exception as e:
+                print(e)
+            print("received full duplex packet")
+            if packet is not None:
+                packetcounter += 1
+                print(str(packetcounter) + " " + bytes.decode(binascii.unhexlify(packet), "utf-8"))
+    def stop(self):
+        self.receiving = False
+
+
 if __name__ == "__main__":
-    rx = rx_init()
+    rx = rx_init(serial="00000008", freq=431000000)
     packetcounter = 0
     while True:
         packet = receive(rx)
         if packet is not None:
             packetcounter += 1
+            print(packet)
             print(str(packetcounter) + " " + bytes.decode(binascii.unhexlify(packet), "utf-8"))
