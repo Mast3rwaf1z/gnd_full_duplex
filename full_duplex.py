@@ -13,8 +13,11 @@ import socket
 txThread = None
 rxThread = None
 
+#create a forward error correction handler object with a shared key
 fechandler = fec.PacketHandler(key="aausat")
 
+#this class is made such that the gnd would only have to interface with a handler that acts as a single hardware, even though it is handling multiple
+#the variables defined here are default values and test values, these can be changed at object creation to suit the specific setup
 class dualBB_handler():
     def __init__(self, txserial="00000003", rxserial="ffffffff", rx_freq=431000000, tx_freq=431200000, timeout=10000, modindex=1, bitrate=2400, ifbw=1, power=0):
         self.tx = bb.Bluebox(serial=txserial)
@@ -33,7 +36,7 @@ class dualBB_handler():
         self.HDBB = None
         
 
-
+    #function to transmit data to a satellite
     def transmit(self, packet:str="ping", tx=None):
         if tx == None:
             tx = self.tx
@@ -41,26 +44,28 @@ class dualBB_handler():
         tx.transmit(data)
         return packet
     
+    #function to receive data from a satellite
     def receive(self, rx=None):
         if rx == None:
             rx = self.rx
         data = None
         while data is None:
-            data,rssi,freq = rx.receive()
-        try:
-            packet,_,_ = fechandler.deframe(data)
+            data,_,_ = rx.receive()
+        try:#a little bit of exception handling
+            packet,_,_ = fechandler.deframe(data) #remove forward error correction before ending the receive function
             return packet
         except:
             print("ERROR: failed to get a valid packet")
-            self.receive()
+            self.receive() #recursion to continue receiving
 
+    #if a package containing the signal to switch to half duplex is received, this function is run, it will terminate the transmitting and receiving threads and start one that does those two operations
     def setHalfDuplex(self, power=0):
-        self.HDBB = self.rx
+        self.HDBB = self.rx     #the bluebox used is fixed to the one that would require the least reconfiguration
         self.HDBB.set_power(power)
         txThread.stop()
         rxThread.stop()
         print("Successfully enabled half duplex!")
-        self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("hdack", "utf-8"))))
+        self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("hdack", "utf-8")))) #send an ack to satellite to let it know that it can stop retransmitting signals to start half duplex
         HD_thead = HDThread(self.HDBB)
         return True
 
