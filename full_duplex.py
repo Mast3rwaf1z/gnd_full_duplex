@@ -16,6 +16,22 @@ rxThread = None
 #create a forward error correction handler object with a shared key
 fechandler = fec.PacketHandler(key="aausat")
 
+#it is time to create a queue data structure such that when the system is gonna transmit, it will only do so if the queue is not empty
+#for the system not to break completely, we will require that the method returns a string and only a string, and adds a string and only a string to the queue
+class queue():
+    def __init__(self):
+        self.items = []
+        self.size = 0
+    def put(self, item:str):
+        self.items.append(item)
+        self.size += 1
+    def pull(self) -> str:
+        if self.size > 0:
+            self.size -= 1
+            return self.items.pop(0)
+        else: 
+            return None
+
 #this class is made such that the gnd would only have to interface with a handler that acts as a single hardware, even though it is handling multiple
 #the variables defined here are default values and test values, these can be changed at object creation to suit the specific setup
 class dualBB_handler():
@@ -34,15 +50,16 @@ class dualBB_handler():
         self.rx.set_modindex(modindex)
         self.tx.set_ifbw(ifbw)
         self.HDBB = None
+        self.tq = queue()
         
 
     #function to transmit data to a satellite
-    def transmit(self, packet:str="ping", tx=None):
+    def transmit(self, tx=None):
         if tx == None:
             tx = self.tx
-        data = fechandler.frame(binascii.hexlify(bytes(packet, "utf-8")))
-        tx.transmit(data)
-        return packet
+        if self.tq.size > 0:
+            data = fechandler.frame(binascii.hexlify(bytes(self.tq.pull(), "utf-8")))
+            tx.transmit(data)
     
     #function to receive data from a satellite
     def receive(self, rx=None):
@@ -66,19 +83,22 @@ class dualBB_handler():
         rxThread.stop()
         print("Successfully enabled half duplex!")
         self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("hdack", "utf-8")))) #send an ack to satellite to let it know that it can stop retransmitting signals to start half duplex
-        HD_thead = HDThread(self.HDBB)
+        HD_thead = HDThread(self.HDBB, self.tq)
         return True
 
 class HDThread(threading.Thread):
-    def __init__(self, HDBB):
+    def __init__(self, HDBB, tq:queue):
         threading.Thread.__init__(self)
         self.HDBB = HDBB
+        self.tq = tq
         time.sleep(4)
         self.start()
     def run(self):
+        HMAC_LEN = 2
         print("Half duplex thread started")
         while True:
-            self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("test", "utf-8"))))
+            if self.tqueue.size > 0:
+                self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes(self.tq.pull(), "utf-8"))))
             print("data sent")
             data = None
             counter = 0
@@ -97,7 +117,7 @@ class HDThread(threading.Thread):
             print("received packet")
             if packet is not None:
                 print(packet)
-                print(bytes.decode(binascii.unhexlify(packet[:len(packet)-2]), "utf-8"))
+                print(bytes.decode(binascii.unhexlify(packet[:len(packet)-HMAC_LEN]), "utf-8"))
             time.sleep(2)
 
 
@@ -145,3 +165,5 @@ if __name__ == "__main__":
     BBH = dualBB_handler(power=4) #leave blank for default configuration
     txThread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
     rxThread = rx_thread(BBH)
+    while True:
+        BBH.tq.put(input("input some data for the queue: "))
