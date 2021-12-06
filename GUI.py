@@ -8,9 +8,9 @@ def exec_fd():
         BBH = fd.dualBB_handler()
         txThread = fd.tx_thread(BBH)
         rxThread = fd.rx_thread(BBH)
-        textbox.config(text="successfully initialized full duplex", fg="green")
+        textbox.config(text="successfully initialized BBH", fg="green")
     except Exception as ex:
-        textbox.config(text="failed to initialize full duplex, is two blueboxes plugged in and initialized correctly?", fg="red")
+        textbox.config(text="ERROR: failed to initialize BBH, is two blueboxes plugged in and initialized correctly?", fg="red")
         print(e)
 
 def queue():
@@ -19,14 +19,14 @@ def queue():
         print(BBH.tq.size)
         textbox.config(text="successfully queued item", fg="red")
     else:
-        textbox.config(text="failed to queue item, is BBH initialized?", fg="red")
+        textbox.config(text="ERROR: failed to queue item, is BBH initialized?", fg="red")
 
 def get_queue():
     if BBH is not None:
         print(BBH.tq.items)
         textbox.config(text="successfully got queue", fg="green")
     else:
-        textbox.config(text="failed to get queue, is BBH initialized?", fg="red")
+        textbox.config(text="ERROR: failed to get queue, is BBH initialized?", fg="red")
 
 root = tk.Tk()
 frame = tk.Frame(root)
