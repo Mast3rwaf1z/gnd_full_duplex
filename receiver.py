@@ -36,6 +36,7 @@ class rx_thread(threading.Thread):
     def run(self):
         packetcounter = 0
         while self.receiving:
+            packet = None
             try:
                 packet = receive(self.rx)
             except Exception as e:

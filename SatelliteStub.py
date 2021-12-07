@@ -18,14 +18,19 @@ def halfDuplex(bb:bb.Bluebox):
     print("transmitting a half duplex packet")
     bb.transmit(utf8encode("received half duplex packet!"))
 
-def utf8decode(data:bytes, offset=2) -> str:
-    packet,_,_ = fechandler.decode(data)
+def utf8decode(data:bytes) -> str:
+    HMAC_LENGTH=2
+    try:
+        packet,_,_ = fechandler.decode(data)
     
-    if packet is not None:
-        try:
-            return bytes.decode(binascii.unhexlify(packet), "utf-8")
-        except:
-            return bytes.decode(binascii.unhexlify(packet[:len(packet)-offset]))
+        if packet is not None:
+            try:
+                return bytes.decode(binascii.unhexlify(packet), "utf-8")
+            except:
+                return bytes.decode(binascii.unhexlify(packet[:len(packet)-HMAC_LENGTH]))
+    except:
+        print("ERROR: fec broke")
+        utf8decode(data) #recursion in case fec breaks
 
 def utf8encode(data:str):
     return fechandler.frame(binascii.hexlify(bytes(data, "utf-8")))
@@ -58,7 +63,7 @@ if __name__ == "__main__":
     while tx == None:
         try:
             #break
-            tx = tx_init(serial="00000008", power=0, freq=txFreq) #working BB
+            tx = tx_init(serial="00000003", power=0, freq=txFreq) #working BB
         except:
             print("no transmitter plugged in")
             time.sleep(5)
@@ -67,7 +72,7 @@ if __name__ == "__main__":
     while rx == None:
         try:
             #break
-            rx = rx_init(serial="ffffffff", power=4, freq=rxFreq) #broken BB
+            rx = rx_init(serial="dead0024", power=4, freq=rxFreq) #broken BB
         except:
             print("no receiver plugged in")
             time.sleep(5)
