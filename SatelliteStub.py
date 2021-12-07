@@ -30,7 +30,7 @@ def utf8decode(data:bytes) -> str:
                 return bytes.decode(binascii.unhexlify(packet[:len(packet)-HMAC_LENGTH]))
     except:
         print("ERROR: fec broke")
-        utf8decode(data) #recursion in case fec breaks
+        return 0
 
 def utf8encode(data:str):
     return fechandler.frame(binascii.hexlify(bytes(data, "utf-8")))
