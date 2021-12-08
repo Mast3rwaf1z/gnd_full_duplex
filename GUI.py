@@ -35,7 +35,7 @@ def queue_file():
                 BBH.tq.put(bytearray.decode(data, "utf-8"))
         textbox.config(text="successfully queued file!", fg="green")
     else:
-        filename = filed.askopenfilename(title="open a file", initialdir="~")
+        filename = filed.askopenfilename(title="open a file", initialdir=".")
         with open(filename, "r") as file:
             ba = bytearray(file.read(), "utf-8")
             Index = 0

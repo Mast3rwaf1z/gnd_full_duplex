@@ -71,18 +71,20 @@ if __name__ == "__main__":
     while tx == None:
         try:
             #break
-            tx = tx_init(serial="00000003", power=0, freq=txFreq) #working BB
-        except:
+            tx = tx_init(serial="dead0024", power=0, freq=txFreq) #working BB
+        except Exception as e:
             print("no transmitter plugged in")
+            print(e)
             time.sleep(5)
             continue
     rx:bb.Bluebox = None
     while rx == None:
         try:
             #break
-            rx = rx_init(serial="dead0024", power=4, freq=rxFreq) #broken BB
-        except:
+            rx = rx_init(serial="00000003", power=4, freq=rxFreq) #broken BB
+        except Exception as e:
             print("no receiver plugged in")
+            print(e)
             time.sleep(5)
             continue
     input("ready? (y/n) ")
