@@ -4,7 +4,7 @@
 [comment]: #	(find out where or if the frequencies have been chosen yet)
 [comment]: #	(maybe make an appendix about testing VHF and UHF with blueboxes so we have a scapegoat for only using UHF)
 - What does prototype mean for the final verson
-(Hardware choices)
+## Hardware choices
 - an overview of the different solutions that can be used for the design of the GND
 	- why we're using a rpi
 	- we could have used a VM
@@ -22,7 +22,7 @@
 
 
 
-(Software choices)
+## Software choices
 - Choice of programming language? why python makes sense
 - why we're not using C for satellite stub
 - development tools
