@@ -26,12 +26,23 @@ def queue_text():
 def queue_file():
     if BBH is not None:
         filename = filed.askopenfilename(title="open a file", initialdir="~")
-        BBH.tq.put(open(filename, "r"))
+        with open(filename, "r") as file:
+            ba = bytearray(file.read(), "utf-8")
+            Index = 0
+            while Index<len(ba):
+                data = ba[Index:Index+80]
+                Index += 80
+                BBH.tq.put(bytearray.decode(data, "utf-8"))
         textbox.config(text="successfully queued file!", fg="green")
     else:
         filename = filed.askopenfilename(title="open a file", initialdir="~")
         with open(filename, "r") as file:
-            print(file.read())
+            ba = bytearray(file.read(), "utf-8")
+            Index = 0
+            while Index<len(ba):
+                data = ba[Index:Index+80]
+                Index += 80
+                print(bytearray.decode(data, "utf-8"))
         textbox.config(text="ERROR: failed to queue file, is BBH initialized?", fg="red")
 
 def get_queue():
