@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog as filed
 
 import full_duplex as fd
 
@@ -14,13 +15,24 @@ def exec_fd():
         textbox.config(text="ERROR: failed to initialize BBH, is two blueboxes plugged in and initialized correctly?", fg="red")
         print(e)
 
-def queue():
+def queue_text():
     global BBH
     if BBH is not None:
         BBH.tq.put(e.get())
         textbox.config(text="successfully queued item", fg="green")
     else:
         textbox.config(text="ERROR: failed to queue item, is BBH initialized?", fg="red")
+
+def queue_file():
+    if BBH is not None:
+        filename = filed.askopenfilename(title="open a file", initialdir="~")
+        BBH.tq.put(open(filename, "r"))
+        textbox.config(text="successfully queued file!", fg="green")
+    else:
+        filename = filed.askopenfilename(title="open a file", initialdir="~")
+        with open(filename, "r") as file:
+            print(file.read())
+        textbox.config(text="ERROR: failed to queue file, is BBH initialized?", fg="red")
 
 def get_queue():
     if BBH is not None:
@@ -43,11 +55,15 @@ exec_button = tk.Button(frame,
                    command=exec_fd)
 exec_button.pack(side=tk.LEFT)
 
-queue_button = tk.Button(frame, text="queue", command=queue)
+queue_button = tk.Button(frame, text="queue", command=queue_text)
 queue_button.pack(side=tk.LEFT)
 
+queue_file_button = tk.Button(frame,text="queue file", command=queue_file)
+queue_file_button.pack(side=tk.LEFT)
+
 get_queue_button = tk.Button(frame, text="Get Queue", command=get_queue)
-get_queue_button.pack(side=tk.BOTTOM)
+get_queue_button.pack(side=tk.LEFT)
+
 
 textbox = tk.Label(root, fg="green")
 textbox.pack(side=tk.BOTTOM)

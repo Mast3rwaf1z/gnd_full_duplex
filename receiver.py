@@ -44,7 +44,11 @@ class rx_thread(threading.Thread):
             print("received full duplex packet")
             if packet is not None:
                 packetcounter += 1
-                print(str(packetcounter) + " " + bytes.decode(binascii.unhexlify(packet), "utf-8"))
+                data = open("data" + packetcounter, "w")
+                data.write(bytes.decode(codecs.decode(packet), "utf-8"))
+                data.close()
+                data = open("data" + packetcounter, "r")
+                print(data.read())
     def stop(self):
         self.receiving = False
 
