@@ -1,8 +1,8 @@
 
-[Design]
-- an overall overview of what we have established so far
-[//]: #	(find out where or if the frequencies have been chosen yet)
-#	maybe make an appendix about testing VHF and UHF with blueboxes so we have a scapegoat for only using UHF
+# Design plan
+[comment]: # (an overall overview of what we have established so far)
+[comment]: #	(find out where or if the frequencies have been chosen yet)
+[comment]: #	(maybe make an appendix about testing VHF and UHF with blueboxes so we have a scapegoat for only using UHF)
 - What does prototype mean for the final verson
 (Hardware choices)
 - an overview of the different solutions that can be used for the design of the GND
