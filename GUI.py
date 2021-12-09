@@ -7,7 +7,7 @@ BBH:fd.dualBB_handler = None
 def exec_fd():
     try:
         global BBH
-        BBH = fd.dualBB_handler(txserial="00000008", rxserial="ffffffff", power=8)
+        BBH = fd.dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4, bitrate=9600)
         fd.txThread = fd.tx_thread(BBH)
         fd.rxThread = fd.rx_thread(BBH)
         textbox.config(text="successfully initialized BBH", fg="green")
@@ -27,12 +27,13 @@ def queue_file():
     if BBH is not None:
         filename = filed.askopenfilename(title="open a file", initialdir="~")
         with open(filename, "r") as file:
-            ba = bytearray(file.read(), "utf-8")
+            ba = file.read()
             Index = 0
             while Index<len(ba):
-                data = ba[Index:Index+80]
-                Index += 80
-                BBH.tq.put(bytearray.decode(data, "utf-8"))
+                data = ba[Index:Index+40]
+                Index += 40
+                print(data)
+                BBH.tq.put(data)
         textbox.config(text="successfully queued file!", fg="green")
     else:
         filename = filed.askopenfilename(title="open a file", initialdir=".")

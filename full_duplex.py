@@ -48,6 +48,7 @@ class dualBB_handler():
         if self.tq.size > 0:
             data = fechandler.frame(binascii.hexlify(bytes(self.tq.pull(), "utf-8")))
             tx.transmit(data)
+        time.sleep(1)
     
     #function to receive data from a satellite
     def receive(self, rx=None):
