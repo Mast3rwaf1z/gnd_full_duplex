@@ -23,7 +23,6 @@ def receive(self:bb.Bluebox):
     data = None
     while data is None:
         data,rssi,freq = self.receive()
-    #codecs.decode(data[0],"0x00f2448e01")
     packet,_,_ = fechandler.deframe(data)
     return packet
 
@@ -32,6 +31,7 @@ class rx_thread(threading.Thread):
         threading.Thread.__init__(self)
         self.receiving = True
         self.rx = rx
+        self.tstop = False
         self.start()
     def run(self):
         packetcounter = 0
@@ -41,17 +41,19 @@ class rx_thread(threading.Thread):
                 packet = receive(self.rx)
             except Exception as e:
                 print(e)
-            print("received full duplex packet")
+            #print("received full duplex packet")
             if packet is not None:
                 packetcounter += 1
-                data = open("data" + str(packetcounter), "w")
-                data.write(codecs.decode(packet))
+                data = open("packets/data" + str(packetcounter), "w")
+                data.write(bytes.decode(binascii.unhexlify(codecs.decode(packet))))
                 data.close()
-                data = open("data" + str(packetcounter), "r")
-                print(data.read())
+                data = open("packets/data" + str(packetcounter), "r")
+                recv = data.read()
+                print(recv, end="")
+                if recv == "tstop":
+                    self.tstop = True
     def stop(self):
         self.receiving = False
-
 
 if __name__ == "__main__":
     rx = rx_init(serial="00000008", freq=431000000)

@@ -10,4 +10,10 @@ The plan for this chapter is to have a
         -   fec integrated
     -   python interface
 ## Half duplex compatibility design
--   
+-   A handler for when a satellite radio "dies"
+    -   we'll call this bbcheck, it is part of the satellite_stub program
+## Test prep
+-   GUI
+    -   queue button
+    -   text field to send plain text packets
+    -   

@@ -52,6 +52,10 @@ def get_queue():
     else:
         textbox.config(text="ERROR: failed to get queue, is BBH initialized?", fg="red")
 
+def stop_transmission():
+    if BBH is not None:
+        BBH.tq.put("tstop")
+
 root = tk.Tk()
 frame = tk.Frame(root)
 frame.pack()
@@ -74,6 +78,9 @@ queue_file_button.pack(side=tk.LEFT)
 
 get_queue_button = tk.Button(frame, text="Get Queue", command=get_queue)
 get_queue_button.pack(side=tk.LEFT)
+
+stop_transmission_request = tk.Button(frame, text="Stop transmission", command=stop_transmission)
+stop_transmission_request.pack(side=tk.LEFT)
 
 
 textbox = tk.Label(root, fg="green")

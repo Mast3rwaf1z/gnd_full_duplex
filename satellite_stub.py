@@ -2,7 +2,9 @@ import binascii
 import codecs
 from logging import exception
 import time
+import os
 import bluebox as bb
+from data_structures import *
 
 from receiver import rx_init, rx_thread, fechandler
 from transmitter import tx_init, tx_thread
@@ -10,6 +12,7 @@ from transmitter import tx_init, tx_thread
 txFreq = 431000000
 rxFreq = 431200000
 packetcounter = 0
+tq = queue()
 
 def halfDuplex(bb:bb.Bluebox):
     data = None
@@ -18,10 +21,10 @@ def halfDuplex(bb:bb.Bluebox):
     print("attempting to receive a half duplex packet")
     while data is None:
         data,rssi,freq_offset = bb.receive()
-    file = open("data" + packetcounter)
+    file = open("packets/data" + packetcounter)
     file.write(utf8decode(data))
     file.close()
-    file = open("data" + packetcounter, "r")
+    file = open("packets/data" + packetcounter, "r")
     print("received: " + file.read())
     print("transmitting a half duplex packet")
     bb.transmit(utf8encode("received half duplex packet!"))
@@ -33,9 +36,9 @@ def utf8decode(data:bytes) -> str:
     
         if packet is not None:
             try:
-                return bytes.decode(codecs.decode(packet))
+                return binascii.unhexlify(bytes.decode(codecs.decode(packet)))
             except:
-                return bytes.decode(codecs.decode(packet[:len(packet)-HMAC_LENGTH]))
+                return binascii.unhexlify(bytes.decode(codecs.decode(packet[:len(packet)-HMAC_LENGTH])))
     except:
         print("ERROR: fec broke")
         return 0
@@ -71,7 +74,7 @@ if __name__ == "__main__":
     while tx == None:
         try:
             #break
-            tx = tx_init(serial="dead0024", power=0, freq=txFreq) #working BB
+            tx = tx_init(serial="dead0024", power=16, freq=txFreq)
         except Exception as e:
             print("no transmitter plugged in")
             print(e)
@@ -81,7 +84,7 @@ if __name__ == "__main__":
     while rx == None:
         try:
             #break
-            rx = rx_init(serial="00000003", power=4, freq=rxFreq) #broken BB
+            rx = rx_init(serial="00000003", power=4, freq=rxFreq)
         except Exception as e:
             print("no receiver plugged in")
             print(e)
@@ -101,6 +104,8 @@ if __name__ == "__main__":
             if rxThread == None:
                 rxThread = rx_thread(rx)
                 print("started rxthread")
+            elif rxThread.tstop:
+                txThread.stop_transmit()
             time.sleep(10)
         if state == 1:
             if not txThread == None:

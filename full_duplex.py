@@ -9,6 +9,7 @@ import binascii
 import codecs
 import getpass
 import socket
+from data_structures import *
 
 txThread = None
 rxThread = None
@@ -18,19 +19,6 @@ fechandler = fec.PacketHandler(key="aausat")
 
 #it is time to create a queue data structure such that when the system is gonna transmit, it will only do so if the queue is not empty
 #for the system not to break completely, we will require that the method returns a string and only a string, and adds a string and only a string to the queue
-class queue():
-    def __init__(self):
-        self.items = []
-        self.size = 0
-    def put(self, item):
-        self.items.append(item)
-        self.size += 1
-    def pull(self):
-        if self.size > 0:
-            self.size -= 1
-            return self.items.pop(0)
-        else: 
-            return None
 
 #this class is made such that the gnd would only have to interface with a handler that acts as a single hardware, even though it is handling multiple
 #the variables defined here are default values and test values, these can be changed at object creation to suit the specific setup
