@@ -38,12 +38,12 @@ def queue_file():
     else:
         filename = filed.askopenfilename(title="open a file", initialdir=".")
         with open(filename, "r") as file:
-            ba = bytearray(file.read(), "utf-8")
+            ba = file.read()
             Index = 0
             while Index<len(ba):
-                data = ba[Index:Index+80]
-                Index += 80
-                print(bytearray.decode(data, "utf-8"))
+                data = ba[Index:Index+40]
+                Index += 40
+                print(data)
         textbox.config(text="ERROR: failed to queue file, is BBH initialized?", fg="red")
 
 def get_queue():
@@ -56,6 +56,9 @@ def get_queue():
 def stop_transmission():
     if BBH is not None:
         BBH.tq.put("tstop")
+        textbox.config(text="successfully stopped transmission", fg="green")
+    else:
+        textbox.config(text="ERROR: failed to stop transmission, is it even initialized?", fg="red")
 
 root = tk.Tk()
 frame = tk.Frame(root)

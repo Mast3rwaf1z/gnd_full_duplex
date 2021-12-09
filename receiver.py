@@ -1,12 +1,16 @@
 import bluebox as bb
+from tests import *
+
 import fec
 import codecs
 import binascii
 import threading
+import time
 
 
 rx:bb.Bluebox
 fechandler = fec.PacketHandler(key="aausat")
+bitrateTest:bitrate_test = None
 
 def rx_init(serial="dead0024", freq=439000000, mod=1, timeout=10000, bitrate=2400, ifbw=1, power=8) -> bb.Bluebox:
     rx = bb.Bluebox(serial=serial)
@@ -23,6 +27,8 @@ def receive(self:bb.Bluebox):
     data = None
     while data is None:
         data,rssi,freq = self.receive()
+        if bitrateTest is not None:
+            bitrateTest.var += data
     packet,_,_ = fechandler.deframe(data)
     return packet
 
@@ -59,6 +65,7 @@ if __name__ == "__main__":
     rx = rx_init(serial="00000008", freq=431000000)
     packetcounter = 0
     while True:
+        bitrateTest = bitrate_test()
         packet = receive(rx)
         if packet is not None:
             packetcounter += 1

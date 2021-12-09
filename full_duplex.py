@@ -7,8 +7,6 @@ import threading
 import time
 import binascii
 import codecs
-import getpass
-import socket
 from data_structures import *
 
 txThread = None
@@ -37,7 +35,7 @@ class dualBB_handler():
         self.tx.set_modindex(modindex)
         self.rx.set_modindex(modindex)
         self.tx.set_ifbw(ifbw)
-        self.HDBB = None
+        self.HDBB:bb.Bluebox = None
         self.tq = queue()
         
 
@@ -65,7 +63,7 @@ class dualBB_handler():
             self.receive() #recursion to continue receiving
 
     #if a package containing the signal to switch to half duplex is received, this function is run, it will terminate the transmitting and receiving threads and start one that does those two operations
-    def setHalfDuplex(self, power=0):
+    def set_half_duplex(self, power=0):
         self.HDBB = self.rx     #the bluebox used is fixed to the one that would require the least reconfiguration
         self.HDBB.set_power(power)
         txThread.stop()
@@ -115,11 +113,10 @@ class HDThread(threading.Thread):
 
 
 class tx_thread(threading.Thread):
-    def __init__(self, BBH:dualBB_handler, packet="test"):
+    def __init__(self, BBH:dualBB_handler):
         threading.Thread.__init__(self)
         self.BBH = BBH
         self.transmitting = True
-        self.packet = packet
         self.start()
         print("transmit thread started")
     def run(self):
@@ -144,7 +141,7 @@ class rx_thread(threading.Thread):
             if packet is not None:
                 decoded = bytes.decode(binascii.unhexlify(packet), "utf-8")
                 if decoded == "sethd":
-                    self.BBH.setHalfDuplex()
+                    self.BBH.set_half_duplex()
 
                 print(str(packetcounter) + " " + decoded)
         print("full duplex receiving ended")
@@ -152,6 +149,8 @@ class rx_thread(threading.Thread):
         self.receiving = False
 
 if __name__ == "__main__":
+    import getpass
+    import socket
     BBH = dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4) #leave blank for default configuration
     txThread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
     rxThread = rx_thread(BBH)

@@ -1,6 +1,6 @@
 import binascii
 import codecs
-from logging import exception
+import threading
 import time
 import os
 import bluebox as bb
@@ -32,6 +32,7 @@ def halfDuplex(bb:bb.Bluebox):
 def utf8decode(data:bytes) -> str:
     HMAC_LENGTH=2
     try:
+        
         packet,_,_ = fechandler.decode(data)
     
         if packet is not None:
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     while tx == None:
         try:
             #break
-            tx = tx_init(serial="dead0024", power=16, freq=txFreq)
+            tx = tx_init(serial="dead0024", power=16, freq=txFreq, bitrate=9200)
         except Exception as e:
             print("no transmitter plugged in")
             print(e)
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     while rx == None:
         try:
             #break
-            rx = rx_init(serial="00000003", power=4, freq=rxFreq)
+            rx = rx_init(serial="00000003", power=4, freq=rxFreq, bitrate=9200)
         except Exception as e:
             print("no receiver plugged in")
             print(e)
@@ -106,6 +107,16 @@ if __name__ == "__main__":
                 print("started rxthread")
             elif rxThread.tstop:
                 txThread.stop_transmit()
+            arg = input("send some data or file: ")
+            if arg == "file":
+                file = open("Shrek.txt")
+                data = file.read()
+                i = 0
+                while i<len(data):
+                    packet = data[i:i+40]
+                    i += 40
+                    txThread.tq.put(packet)
+
             time.sleep(10)
         if state == 1:
             if not txThread == None:
