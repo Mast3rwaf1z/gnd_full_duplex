@@ -6,8 +6,9 @@ class bitrate_test(threading.Thread):
         threading.Thread.__init__(self)
         self.var = 0
         self.start()
+        print("started bitrate test")
     def run(self):
-        time.sleep(1)
-        print(self.var)
-        self.var = 0
-
+        while True:
+            time.sleep(1)
+            print(self.var)
+            self.var = 0

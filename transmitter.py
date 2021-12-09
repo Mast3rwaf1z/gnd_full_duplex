@@ -9,7 +9,7 @@ import time
 from data_structures import *
 fecc = fec.PacketHandler(key="aausat")
 
-def tx_init(serial="dead0024", freq=145000000, power=0, mod=1, bitrate=2400, ifbw=1, timeout=10000) -> bb.Bluebox:
+def tx_init(serial="dead0024", freq=145000000, power=0, mod=1, bitrate=2400, ifbw=2, timeout=10000) -> bb.Bluebox:
     tx = bb.Bluebox(serial=serial) #get serial key from bbctl list
     tx.tx_mode()
     tx.set_frequency(freq)

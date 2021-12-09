@@ -75,7 +75,7 @@ if __name__ == "__main__":
     while tx == None:
         try:
             #break
-            tx = tx_init(serial="dead0024", power=16, freq=txFreq, bitrate=9200)
+            tx = tx_init(serial="dead0024", power=16, freq=txFreq, bitrate=4800)
         except Exception as e:
             print("no transmitter plugged in")
             print(e)
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     while rx == None:
         try:
             #break
-            rx = rx_init(serial="00000003", power=4, freq=rxFreq, bitrate=9200)
+            rx = rx_init(serial="00000003", power=0, freq=rxFreq, bitrate=4800)
         except Exception as e:
             print("no receiver plugged in")
             print(e)
@@ -100,13 +100,15 @@ if __name__ == "__main__":
             rx.get_frequency()
             #start full duplex
             if txThread == None:
-                txThread = tx_thread(tx)
+                txThread = tx_thread(tx, tq)
                 print("started txthread")
             if rxThread == None:
                 rxThread = rx_thread(rx)
                 print("started rxthread")
             elif rxThread.tstop:
+                print("stopping transmission")
                 txThread.stop_transmit()
+                rxThread.tstop = False
             arg = input("send some data or file: ")
             if arg == "file":
                 file = open("Shrek.txt")
