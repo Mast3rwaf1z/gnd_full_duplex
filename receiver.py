@@ -1,5 +1,5 @@
 import bluebox as bb
-from tests import *
+#from tests import *
 
 import fec
 import codecs
@@ -22,12 +22,12 @@ def rx_init(serial="dead0024", freq=439000000, mod=1, timeout=10000, bitrate=240
     rx.set_power(power)
     return rx
 
-def receive(self:bb.Bluebox, bitrateTest:bitrate_test):
+def receive(self:bb.Bluebox):
     data = None
     while data is None:
         data,rssi,freq = self.receive()
-        if bitrateTest is not None:
-            bitrateTest.var += len(data)
+        #if bitrateTest is not None:
+            #bitrateTest.var += len(data)
     packet,_,_ = fechandler.deframe(data)
     return packet
 
@@ -37,14 +37,14 @@ class rx_thread(threading.Thread):
         self.receiving = True
         self.rx = rx
         self.tstop = False
-        self.bitrateTest = bitrate_test()
+        #self.bitrateTest = bitrate_test()
         self.start()
     def run(self):
         packetcounter = 0
         while self.receiving:
             packet = None
             try:
-                packet = receive(self.rx, self.bitrateTest)
+                packet = receive(self.rx)
             except Exception as e:
                 print(e)
             #print("received full duplex packet")
@@ -55,7 +55,7 @@ class rx_thread(threading.Thread):
                 data.close()
                 data = open("packets/data" + str(packetcounter), "r")
                 recv = data.read()
-                #print(recv, end="")
+                print(recv, end="")
                 if recv == "tstop":
                     self.tstop = True
     def stop(self):

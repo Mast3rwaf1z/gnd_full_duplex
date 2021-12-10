@@ -45,7 +45,7 @@ def utf8decode(data:bytes) -> str:
         return 0
 
 def utf8encode(data:str):
-    return fechandler.frame(codecs.encode(bytes(data, "utf-8")))
+    return fechandler.frame(codecs.encode(str(bytes(data, "utf-8"))))
 
 def bbcheck(tx:bb.Bluebox, rx:bb.Bluebox) -> int:
     try:
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     while tx == None:
         try:
             #break
-            tx = tx_init(serial="dead0024", power=16, freq=txFreq, bitrate=4800)
+            tx = tx_init(serial="02010001", power=0, freq=txFreq, bitrate=4800)
         except Exception as e:
             print("no transmitter plugged in")
             print(e)

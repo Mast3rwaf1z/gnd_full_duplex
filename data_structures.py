@@ -11,3 +11,5 @@ class queue():
             return self.items.pop(0)
         else: 
             return None
+    def clear(self):
+        self.__init__()

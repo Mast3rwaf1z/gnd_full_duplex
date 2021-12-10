@@ -37,7 +37,7 @@ class tx_thread(threading.Thread):
             if self.tq.size>0:
                 try:
                     transmit(self.tx, self.tq.pull())
-                    time.sleep(1.5)
+                    #time.sleep(1.5)
                 except:
                     print("transmitter might have been disconnected, exiting")
                     return
@@ -52,7 +52,7 @@ class tx_thread(threading.Thread):
         self.transmitting = False
     def stop_transmit(self):
         while self.tq.size>0:
-            self.tq.pull()
+            self.tq.clear()
 
 if __name__ == "__main__":
     tx = tx_init(power=13, freq=431000000)
