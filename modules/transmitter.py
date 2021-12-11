@@ -1,13 +1,10 @@
-import codecs
 import socket
 import getpass
 import threading
 import bluebox as bb
-import fec
-import binascii
 import time
-from data_structures import *
-fecc = fec.PacketHandler(key="aausat")
+from modules.data_structures import *
+import modules.encoding as encoding
 
 def tx_init(serial="dead0024", freq=145000000, power=0, mod=1, bitrate=2400, ifbw=2, timeout=10000) -> bb.Bluebox:
     tx = bb.Bluebox(serial=serial) #get serial key from bbctl list
@@ -21,9 +18,9 @@ def tx_init(serial="dead0024", freq=145000000, power=0, mod=1, bitrate=2400, ifb
     return tx
 
 def transmit(tx:bb.Bluebox, packet:str = "ping") -> tuple:
-    data = fecc.frame(binascii.hexlify(bytes(packet, "utf-8")))
+    data = encoding.utf8encode(packet)
     tx.transmit(data)
-    return packet
+    return data
 
 class tx_thread(threading.Thread):
     def __init__(self, tx:bb.Bluebox, tq:queue):

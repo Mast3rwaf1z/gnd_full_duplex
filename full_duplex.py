@@ -1,19 +1,18 @@
 #gnd imports
 import bluebox as bb
-import fec
 
 #standard imports
 import threading
 import time
-import binascii
-import codecs
-from data_structures import *
+from modules.data_structures import *
+
+#our project imports
+import modules.encoding as encoding
 
 txThread = None
 rxThread = None
 
 #create a forward error correction handler object with a shared key
-fechandler = fec.PacketHandler(key="aausat")
 
 #it is time to create a queue data structure such that when the system is gonna transmit, it will only do so if the queue is not empty
 #for the system not to break completely, we will require that the method returns a string and only a string, and adds a string and only a string to the queue
@@ -45,7 +44,7 @@ class dualBB_handler():
         if tx == None:
             tx = self.tx
         if self.tq.size > 0:
-            data = fechandler.frame(binascii.hexlify(bytes(self.tq.pull(), "utf-8")))
+            data = encoding.utf8encode(self.tq.pull())
             tx.transmit(data)
         time.sleep(1)
     
@@ -56,12 +55,7 @@ class dualBB_handler():
         data = None
         while data is None:
             data,_,_ = rx.receive()
-        try:#a little bit of exception handling
-            packet,_,_ = fechandler.deframe(data) #remove forward error correction before ending the receive function
-            return packet
-        except:
-            print("ERROR: failed to get a valid packet")
-            self.receive() #recursion to continue receiving
+        return data
 
     #if a package containing the signal to switch to half duplex is received, this function is run, it will terminate the transmitting and receiving threads and start one that does those two operations
     def set_half_duplex(self, power=4):
@@ -70,12 +64,12 @@ class dualBB_handler():
         txThread.stop()
         rxThread.stop()
         print("Successfully enabled half duplex!")
-        self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes("hdack", "utf-8")))) #send an ack to satellite to let it know that it can stop retransmitting signals to start half duplex
+        self.HDBB.transmit(encoding.utf8encode("hdack")) #send an ack to satellite to let it know that it can stop retransmitting signals to start half duplex
         HD_thead = HDThread(self.HDBB, self.tq)
         return True
 
 class HDThread(threading.Thread):
-    def __init__(self, HDBB, tq:queue):
+    def __init__(self, HDBB:bb.Bluebox, tq:queue):
         threading.Thread.__init__(self)
         self.HDBB = HDBB
         self.tq = tq
@@ -86,7 +80,7 @@ class HDThread(threading.Thread):
         print("Half duplex thread started")
         while True:
             if self.tq.size > 0:
-                self.HDBB.transmit(fechandler.frame(binascii.hexlify(bytes(self.tq.pull(), "utf-8"))))
+                self.HDBB.transmit(encoding.utf8encode(self.tq.pull()))
                 print("data sent")
             else:
                 print("queue empty")
@@ -99,15 +93,9 @@ class HDThread(threading.Thread):
                 data,_,_ = self.HDBB.receive()
             if counter > 3:
                 continue
-            try:
-                packet,_,_ = fechandler.decode(data)
-            except Exception as e:
-                print(e)
 
             print("received packet")
-            if packet is not None:
-                print(packet)
-                print(bytes.decode(binascii.unhexlify(packet[:len(packet)-HMAC_LEN]), "utf-8"))
+            print(encoding.utf8decode(data))
             time.sleep(2)
 
 
@@ -141,9 +129,9 @@ class rx_thread(threading.Thread):
             packet = self.BBH.receive()
             if packet is not None:
                 try:
-                    decoded = bytes.decode(binascii.unhexlify(codecs.decode(packet)))
+                    decoded = encoding.utf8decode(packet)
                 except:
-                    decoded = bytes.decode(binascii.unhexlify(codecs.decode(packet[:len(packet)-2])))
+                    decoded = encoding.utf8decode(packet)
                 if decoded == "sethd":
                     self.BBH.set_half_duplex()
 

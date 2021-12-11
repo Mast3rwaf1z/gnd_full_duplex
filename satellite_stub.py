@@ -1,13 +1,10 @@
-import binascii
-import codecs
-import threading
 import time
-import os
 import bluebox as bb
-from data_structures import *
+from modules.data_structures import *
+import modules.encoding as encoding
 
-from receiver import rx_init, rx_thread, fechandler
-from transmitter import tx_init, tx_thread
+from modules.receiver import rx_init, rx_thread
+from modules.transmitter import tx_init, tx_thread
 
 txFreq = 431000000
 rxFreq = 431200000
@@ -22,30 +19,12 @@ def halfDuplex(bb:bb.Bluebox):
     while data is None:
         data,rssi,freq_offset = bb.receive()
     file = open("packets/data" + packetcounter)
-    file.write(utf8decode(data))
+    file.write(encoding.utf8decode(data))
     file.close()
     file = open("packets/data" + packetcounter, "r")
     print("received: " + file.read())
     print("transmitting a half duplex packet")
-    bb.transmit(utf8encode("received half duplex packet!"))
-
-def utf8decode(data:bytes) -> str:
-    HMAC_LENGTH=2
-    try:
-        
-        packet,_,_ = fechandler.decode(data)
-    
-        if packet is not None:
-            try:
-                return binascii.unhexlify(bytes.decode(codecs.decode(packet)))
-            except:
-                return binascii.unhexlify(bytes.decode(codecs.decode(packet[:len(packet)-HMAC_LENGTH])))
-    except:
-        print("ERROR: fec broke")
-        return 0
-
-def utf8encode(data:str):
-    return fechandler.frame(codecs.encode(str(bytes(data, "utf-8"))))
+    bb.transmit(encoding.utf8encode("received half duplex packet!"))
 
 def bbcheck(tx:bb.Bluebox, rx:bb.Bluebox) -> int:
     try:
@@ -127,9 +106,9 @@ if __name__ == "__main__":
             if not ack:
                 packet = None
                 while packet is None:
-                    tx.transmit(utf8encode("sethd"))
+                    tx.transmit(encoding.utf8encode("sethd"))
                     packet,_,_ = tx.receive()
-                if utf8decode(packet) == "hdack":
+                if encoding.utf8decode(packet) == "hdack":
                     ack = True
             #start half duplex
             halfDuplex(tx)
@@ -141,9 +120,9 @@ if __name__ == "__main__":
             if not ack:
                 packet = None
                 while packet is None:
-                    rx.transmit(utf8encode("sethd"))
+                    rx.transmit(encoding.utf8encode("sethd"))
                     packet,_,_ = rx.receive()
-                if utf8decode(packet) == "hdack":
+                if encoding.utf8decode(packet) == "hdack":
                     ack = True
             #start half duplex
             halfDuplex(rx)

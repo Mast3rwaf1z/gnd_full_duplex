@@ -38,7 +38,7 @@ def queue_file():
                 BBH.tq.put(data)
         textbox.config(text="successfully queued file!", fg="green")
     else:
-        filename = filed.askopenfilename(title="open a file", initialdir=".")
+        filename = filed.askopenfilename(title="open a file", initialdir="~/aausat6/gnd_full_duplex/")
         with open(filename, "r") as file:
             ba = file.read()
             Index = 0

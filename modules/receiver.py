@@ -1,15 +1,15 @@
-import bluebox as bb
-#from tests import *
-
-import fec
-import codecs
-import binascii
+#standard
 import threading
 import time
 
+#aausat
+import bluebox as bb
+
+#our project
+#from tests import *
+import modules.encoding as encoding
 
 rx:bb.Bluebox
-fechandler = fec.PacketHandler(key="aausat")
 
 def rx_init(serial="dead0024", freq=439000000, mod=1, timeout=10000, bitrate=2400, ifbw=2, power=8) -> bb.Bluebox:
     rx = bb.Bluebox(serial=serial)
@@ -28,8 +28,7 @@ def receive(self:bb.Bluebox):
         data,rssi,freq = self.receive()
         #if bitrateTest is not None:
             #bitrateTest.var += len(data)
-    packet,_,_ = fechandler.deframe(data)
-    return packet
+    return data
 
 class rx_thread(threading.Thread):
     def __init__(self, rx:bb.Bluebox):
@@ -47,11 +46,10 @@ class rx_thread(threading.Thread):
                 packet = receive(self.rx)
             except Exception as e:
                 print(e)
-            #print("received full duplex packet")
             if packet is not None:
                 packetcounter += 1
                 data = open("packets/data" + str(packetcounter), "w")
-                data.write(bytes.decode(binascii.unhexlify(codecs.decode(packet))))
+                data.write(encoding.utf8decode(packet))
                 data.close()
                 data = open("packets/data" + str(packetcounter), "r")
                 recv = data.read()
@@ -69,4 +67,4 @@ if __name__ == "__main__":
         if packet is not None:
             packetcounter += 1
             print(packet)
-            print(str(packetcounter) + " " + bytes.decode(binascii.unhexlify(packet), "utf-8"))
+            print(str(packetcounter) + " " + encoding.utf8decode(packet))
