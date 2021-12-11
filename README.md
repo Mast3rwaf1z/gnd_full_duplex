@@ -2,7 +2,7 @@ Note all software developed as part of this project is based on a closed reposit
 
 The primary maintainer of this repository goes under the name Mast3r_waf1z, but can also be contacted via tjen19@student.aau.dk.
 # AAUSAT ground station
-Here lies the programs for the full duplex implementation for AAU cubesats
+Here lies the programs for the full duplex radio communication implementation for AAU cubesats
 ## Requirements
 - Install bbctl: https://github.com/aausat/bbctl
     
