@@ -1,7 +1,7 @@
 Note all software developed as part of this project is based on a closed repository under Aalborg University
 # AAUSAT ground station
 Here lies the programs for the full duplex implementation for AAU cubesats
-## REQUIREMENTS
+## Requirements
 - Install bbctl: https://github.com/aausat/bbctl
     
     - This will enable the use of the following dependencies like this:
