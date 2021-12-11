@@ -1,4 +1,5 @@
 Note all software developed as part of this project is based on a closed repository under Aalborg University
+The primary maintainer of this repository goes under the name Mast3r_waf1z, but can also be contacted via tjen19@student.aau.dk.
 # AAUSAT ground station
 Here lies the programs for the full duplex implementation for AAU cubesats
 ## Requirements
