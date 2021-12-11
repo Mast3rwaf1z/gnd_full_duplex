@@ -68,8 +68,9 @@ class dualBB_handler():
         HD_thead = HDThread(self.HDBB, self.tq)
         return True
 
+#if a radio dies on the satellite, this thread will switch on instead of the rx and tx threads to handle the single frequency
 class HDThread(threading.Thread):
-    def __init__(self, HDBB:bb.Bluebox, tq:queue):
+    def __init__(self, HDBB:bb.Bluebox, tq:queue): #we're renaming the BB object to better suit our needs here
         threading.Thread.__init__(self)
         self.HDBB = HDBB
         self.tq = tq
@@ -85,13 +86,13 @@ class HDThread(threading.Thread):
             else:
                 print("queue empty")
             data = None
-            counter = 0
+            counter = 0     #the thought behind using a counter here is to interrupt the attempt to receive in case we missed the packet
             while data is None:
                 counter += 1
-                if counter > 3:
+                if counter > 3: #it is allowed to timeout 3 times, the timeout is 10000 ms as initialized in the handler
                     break
                 data,_,_ = self.HDBB.receive()
-            if counter > 3:
+            if counter > 3: #this essentially does the same as exception handling, it restarts the loop if no packet is received
                 continue
 
             print("received packet")
@@ -100,7 +101,9 @@ class HDThread(threading.Thread):
 
 
 
-
+#this thread simply handles continuous calls to the BBH transmit method, the reason this class exists
+#is to provide the ability to call the transmit function without a threading class, this will allow
+#this program to be configured more in depth than if everything was completely automatic
 class tx_thread(threading.Thread):
     def __init__(self, BBH:dualBB_handler):
         threading.Thread.__init__(self)
@@ -115,6 +118,8 @@ class tx_thread(threading.Thread):
     def stop(self):
         self.transmitting = False
 
+#this class does largely the same as the transmit thread, it just receives in place of transmitting, followed by calling the decoding method
+
 class rx_thread(threading.Thread):
     def __init__(self, BBH:dualBB_handler):
         threading.Thread.__init__(self)
@@ -126,21 +131,18 @@ class rx_thread(threading.Thread):
         packetcounter = 0
         while self.receiving:
             packetcounter += 1
-            packet = self.BBH.receive()
+            packet = self.BBH.receive() #listen for packets
             if packet is not None:
-                try:
-                    decoded = encoding.utf8decode(packet)
-                except:
-                    decoded = encoding.utf8decode(packet)
-                if decoded == "sethd":
+                decoded = encoding.utf8decode(packet) #decode packet
+                if decoded == "sethd": #check if a BB is dead
                     self.BBH.set_half_duplex()
 
-                print(str(packetcounter) + " " + decoded)
-        print("full duplex receiving ended")
-    def stop(self):
+                print(str(packetcounter) + " " + decoded) #print the received packet
+        print("full duplex receiving ended") #if loop is broken and thread is ending
+    def stop(self): #method to interrupt the thread
         self.receiving = False
 
-if __name__ == "__main__":
+if __name__ == "__main__":#some dummy testing to see if it works
     import getpass
     import socket
     BBH = dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4) #leave blank for default configuration
