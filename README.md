@@ -21,7 +21,7 @@ Here lies the programs for the full duplex radio communication implementation fo
       $ pip3 install -r . --user
       ```
 - Have the hardware used:
-- Two to four blueboxes
+    - Two to four blueboxes
 - The full_duplex.py program can run on any system with bbctl installed
 - The satellite_stub.py program has only been tested in Arch Linux
     -   The main purpose of this program is to test the capability of the full_duplex.py program

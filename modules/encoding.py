@@ -24,6 +24,7 @@ def utf8decode(data, HMAC_length=2) -> str:
         raw,_,_ = fechandler.deframe(data)
     except Exception as e:
         print(e)
+        return
     if raw is not None:
         try:
             decoded = codecs.decode(raw)

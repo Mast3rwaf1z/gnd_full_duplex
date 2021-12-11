@@ -26,8 +26,8 @@ def receive(self:bb.Bluebox, bitrateTest:tests.bitrate_test):
     data = None
     while data is None:
         data,rssi,freq = self.receive()
-        if bitrateTest is not None:
-            bitrateTest.var += len(data)
+    if bitrateTest is not None:
+        bitrateTest.var += len(data)
     return data
 
 class rx_thread(threading.Thread):
@@ -43,19 +43,22 @@ class rx_thread(threading.Thread):
         while self.receiving:
             packet = None
             try:
-                packet = receive(self.rx)
+                packet = receive(self.rx, self.bitrateTest)
             except Exception as e:
                 print(e)
+                continue
             if packet is not None:
                 packetcounter += 1
                 data = open("packets/data" + str(packetcounter), "w")
-                data.write(encoding.utf8decode(packet))
-                data.close()
-                data = open("packets/data" + str(packetcounter), "r")
-                recv = data.read()
-                print(recv, end="")
-                if recv == "tstop":
-                    self.tstop = True
+                packet = encoding.utf8decode(packet)
+                if packet is not None:
+                    data.write(packet)
+                    data.close()
+                    data = open("packets/data" + str(packetcounter), "r")
+                    recv = data.read()
+                    print(recv, end="")
+                    if recv == "tstop":
+                        self.tstop = True
     def stop(self):
         self.receiving = False
 
