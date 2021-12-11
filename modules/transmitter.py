@@ -34,7 +34,6 @@ class tx_thread(threading.Thread):
             if self.tq.size>0:
                 try:
                     transmit(self.tx, self.tq.pull())
-                    #time.sleep(1.5)
                 except:
                     print("transmitter might have been disconnected, exiting")
                     return

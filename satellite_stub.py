@@ -18,7 +18,7 @@ def halfDuplex(bb:bb.Bluebox):
     print("attempting to receive a half duplex packet")
     while data is None:
         data,rssi,freq_offset = bb.receive()
-    file = open("packets/data" + packetcounter)
+    file = open("packets/data" + str(packetcounter))
     file.write(encoding.utf8decode(data))
     file.close()
     file = open("packets/data" + packetcounter, "r")
@@ -90,7 +90,7 @@ if __name__ == "__main__":
                 rxThread.tstop = False
             arg = input("send some data or file: ")
             if arg == "file":
-                file = open("Shrek.txt")
+                file = open("tests/Shrek.txt")
                 data = file.read()
                 i = 0
                 while i<len(data):
@@ -106,6 +106,7 @@ if __name__ == "__main__":
             if not ack:
                 packet = None
                 while packet is None:
+                    print("attempting to set half duplex")
                     tx.transmit(encoding.utf8encode("sethd"))
                     packet,_,_ = tx.receive()
                 if encoding.utf8decode(packet) == "hdack":
@@ -120,6 +121,7 @@ if __name__ == "__main__":
             if not ack:
                 packet = None
                 while packet is None:
+                    print("attempting to set half duplex")
                     rx.transmit(encoding.utf8encode("sethd"))
                     packet,_,_ = rx.receive()
                 if encoding.utf8decode(packet) == "hdack":

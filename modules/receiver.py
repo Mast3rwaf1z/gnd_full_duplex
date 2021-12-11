@@ -6,7 +6,7 @@ import time
 import bluebox as bb
 
 #our project
-#from tests import *
+import modules.tests.tests as tests
 import modules.encoding as encoding
 
 rx:bb.Bluebox
@@ -22,12 +22,12 @@ def rx_init(serial="dead0024", freq=439000000, mod=1, timeout=10000, bitrate=240
     rx.set_power(power)
     return rx
 
-def receive(self:bb.Bluebox):
+def receive(self:bb.Bluebox, bitrateTest:tests.bitrate_test):
     data = None
     while data is None:
         data,rssi,freq = self.receive()
-        #if bitrateTest is not None:
-            #bitrateTest.var += len(data)
+        if bitrateTest is not None:
+            bitrateTest.var += len(data)
     return data
 
 class rx_thread(threading.Thread):
@@ -36,7 +36,7 @@ class rx_thread(threading.Thread):
         self.receiving = True
         self.rx = rx
         self.tstop = False
-        #self.bitrateTest = bitrate_test()
+        self.bitrateTest = tests.bitrate_test()
         self.start()
     def run(self):
         packetcounter = 0
