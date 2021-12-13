@@ -34,6 +34,10 @@ class queue():
         else: 
             return None
 ```
+## Exception handling
+-   If a radio picks up some noise
+    -   Reed-Solomon Decoding Errors
+-   The issue with HMAC
 ## Test prep
 -   GUI
     -   queue button
