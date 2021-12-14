@@ -17,8 +17,7 @@ Here lies the programs for the full duplex radio communication implementation fo
       ```console
       $ git clone git@github:aausat/bbctl.git
       $ cd bbctl
-      $ pip3 install pyusb --user
-      $ pip3 install -r . --user
+      $ pip3 install -r requirements.txt --user
       ```
 - Have the hardware used:
     - Two to four blueboxes
