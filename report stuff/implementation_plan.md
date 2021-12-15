@@ -38,6 +38,13 @@ class queue():
 -   If a radio picks up some noise
     -   Reed-Solomon Decoding Errors
 -   The issue with HMAC
+## encoding
+-   insert the encoding types used
+-   explain the issues with bytes, binascii, codecs and fec
+-   show the code
+    ```python
+    
+    ```
 ## Test prep
 -   GUI
     -   queue button

@@ -1,5 +1,5 @@
 #gnd imports
-import bluebox as bb
+from bluebox import Bluebox
 
 #standard imports
 import threading
@@ -21,8 +21,8 @@ rxThread = None
 #the variables defined here are default values and test values, these can be changed at object creation to suit the specific setup
 class dualBB_handler():
     def __init__(self, txserial="00000003", rxserial="ffffffff", rx_freq=431000000, tx_freq=431200000, timeout=10000, modindex=1, bitrate=2400, ifbw=1, power=0):
-        self.tx = bb.Bluebox(serial=txserial)
-        self.rx = bb.Bluebox(serial=rxserial)
+        self.tx = Bluebox(serial=txserial)
+        self.rx = Bluebox(serial=rxserial)
         self.tx.tx_mode()
         self.rx.rx_mode()
         self.tx.set_frequency(tx_freq)
@@ -35,7 +35,7 @@ class dualBB_handler():
         self.rx.set_modindex(modindex)
         self.tx.set_ifbw(ifbw)
         self.rx.set_ifbw(ifbw)
-        self.HDBB:bb.Bluebox = None
+        self.HDBB:Bluebox = None
         self.tq = queue()
         
 
@@ -58,29 +58,28 @@ class dualBB_handler():
 
     #if a package containing the signal to switch to half duplex is received, this function is run, it will terminate the transmitting and receiving threads and start one that does those two operations
     def set_half_duplex(self, power=4):
-        self.HDBB = self.rx     #the bluebox used is fixed to the one that would require the least reconfiguration
-        self.HDBB.set_power(power)
+        self.half_duplex_bb = self.rx     #the bluebox used is fixed to the one that would require the least reconfiguration
+        self.half_duplex_bb.set_power(power)
         txThread.stop()
         rxThread.stop()
         print("Successfully enabled half duplex!")
         self.HDBB.transmit(encoding.utf8encode("hdack")) #send an ack to satellite to let it know that it can stop retransmitting signals to start half duplex
-        HD_thead = HDThread(self.HDBB, self.tq)
+        Half_duplex_thread = half_duplex_thread(self.half_duplex_bb, self.tq)
         return True
 
 #if a radio dies on the satellite, this thread will switch on instead of the rx and tx threads to handle the single frequency
-class HDThread(threading.Thread):
-    def __init__(self, HDBB:bb.Bluebox, tq:queue): #we're renaming the BB object to better suit our needs here
+class half_duplex_thread(threading.Thread):
+    def __init__(self, half_duplex_bb:Bluebox, tq:queue): #we're renaming the BB object to better suit our needs here
         threading.Thread.__init__(self)
-        self.HDBB = HDBB
+        self.half_duplex_bb:Bluebox = half_duplex_bb
         self.tq = tq
         time.sleep(4)
         self.start()
     def run(self):
-        HMAC_LEN = 2
         print("Half duplex thread started")
         while True:
             if self.tq.size > 0:
-                self.HDBB.transmit(encoding.utf8encode(self.tq.pull()))
+                self.half_duplex_bb.transmit(encoding.utf8encode(self.tq.pull()))
                 print("data sent")
             else:
                 print("queue empty")
@@ -90,7 +89,7 @@ class HDThread(threading.Thread):
                 counter += 1
                 if counter > 3: #it is allowed to timeout 3 times, the timeout is 10000 ms as initialized in the handler
                     break
-                data,_,_ = self.HDBB.receive()
+                data,_,_ = self.half_duplex_bb.receive()
             if counter > 3: #this essentially does the same as exception handling, it restarts the loop if no packet is received
                 continue
 
@@ -104,15 +103,15 @@ class HDThread(threading.Thread):
 #is to provide the ability to call the transmit function without a threading class, this will allow
 #this program to be configured more in depth than if everything was completely automatic
 class tx_thread(threading.Thread):
-    def __init__(self, BBH:dualBB_handler):
+    def __init__(self, bb_handler:dualBB_handler):
         threading.Thread.__init__(self)
-        self.BBH = BBH
+        self.bb_handler = bb_handler
         self.transmitting = True
         self.start()
         print("transmit thread started")
     def run(self):
         while self.transmitting:
-            self.BBH.transmit()
+            self.bb_handler.transmit()
         print("full duplex transmission ended")
     def stop(self):
         self.transmitting = False
@@ -120,9 +119,9 @@ class tx_thread(threading.Thread):
 #this class does largely the same as the transmit thread, it just receives in place of transmitting, followed by calling the decoding method
 
 class rx_thread(threading.Thread):
-    def __init__(self, BBH:dualBB_handler):
+    def __init__(self, bb_handler:dualBB_handler):
         threading.Thread.__init__(self)
-        self.BBH = BBH
+        self.bb_handler = bb_handler
         self.receiving = True
         self.start()
         print("receive thread started")
@@ -130,11 +129,11 @@ class rx_thread(threading.Thread):
         packetcounter = 0
         while self.receiving:
             packetcounter += 1
-            packet = self.BBH.receive() #listen for packets
+            packet = self.bb_handler.receive() #listen for packets
             if packet is not None:
                 decoded = encoding.utf8decode(packet) #decode packet
                 if decoded == "sethd": #check if a BB is dead
-                    self.BBH.set_half_duplex()
+                    self.bb_handler.set_half_duplex()
 
                 print(str(packetcounter) + " " + decoded) #print the received packet
         print("full duplex receiving ended") #if loop is broken and thread is ending
@@ -144,8 +143,8 @@ class rx_thread(threading.Thread):
 if __name__ == "__main__":#some dummy testing to see if it works
     import getpass
     import socket
-    BBH = dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4) #leave blank for default configuration
-    txThread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
-    rxThread = rx_thread(BBH)
+    bb_handler = dualBB_handler(txserial="00000008", rxserial="ffffffff", power=4) #leave blank for default configuration
+    txThread = tx_thread(bb_handler, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + bb_handler.tx.serial)
+    rxThread = rx_thread(bb_handler)
     while True:
-        BBH.tq.put(input("input some data for the queue: "))
+        bb_handler.tq.put(input("input some data for the queue: "))
