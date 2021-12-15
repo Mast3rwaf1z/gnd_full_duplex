@@ -34,6 +34,35 @@ class queue():
         else: 
             return None
 ```
+## encoding
+-   insert the encoding types used
+    -   fec
+    -   bytes
+        -   utf-8
+        -   codecs
+    -   old stuff
+        -   binascii
+-   the implementation
+    ```python
+    def utf8encode(data:str) -> bytes:
+    return fechandler.frame(data.encode("utf-8"))
+
+    def utf8decode(data, HMAC_length=2) -> str:
+        try: 
+            raw,_,_ = fechandler.deframe(data)
+        except Exception as e:
+            print(e)
+            return
+        if raw is not None:
+            try:
+                decoded = codecs.decode(raw)
+                log.add("1st_decode.txt") 
+                return decoded
+            except:
+                decoded = codecs.decode(raw[:len(raw)-HMAC_length])
+                log.add("2nd_decode.txt")
+                return decoded
+    ```
 ## Test prep
 -   GUI
     -   queue button
