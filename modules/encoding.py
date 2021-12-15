@@ -4,7 +4,7 @@ import fec
 #standard imports
 import codecs
 
-import modules.logs.log as log
+import logs.log as log
 
 #here is the master behind our forward error correction, a library that does the work for us,
 #this handler encodes the data with Reed-Solomon encoding
@@ -23,6 +23,7 @@ def utf8decode(data, HMAC_length=2) -> str:
     try: 
         raw,_,_ = fechandler.deframe(data)
     except Exception as e:
+        log.add("reed_solomon_errors.txt")
         print(e)
         return
     if raw is not None:

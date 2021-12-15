@@ -40,6 +40,7 @@ class queue():
     -   bytes
         -   utf-8
         -   codecs
+    -   space link
     -   old stuff
         -   binascii
 -   the implementation
