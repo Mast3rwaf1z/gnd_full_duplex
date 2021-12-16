@@ -78,65 +78,66 @@ if __name__ == "__main__":
 
     while True:
         state = bbcheck(tx, rx)
-        if state == 0:
-            rx.get_frequency()
-            #start full duplex
-            if txThread == None:
-                txThread = tx_thread(tx, tq)
-                print("started txthread")
-            if rxThread == None:
-                rxThread = rx_thread(rx)
-                print("started rxthread")
-            elif rxThread.tstop:
-                print("stopping transmission")
-                txThread.stop_transmit()
-                rxThread.tstop = False
-            arg = input("send some data or file: ")
-            if arg == "file":
-                file = open("modules/tests/Shrek.txt")
-                data = file.read()
-                i = 0
-                while i<len(data):
-                    packet = data[i:i+40]
-                    i += 40
-                    txThread.tq.put(packet)
+        match bbcheck(tx, rx):
+            case 0:
+                rx.get_frequency()
+                #start full duplex
+                if txThread == None:
+                    txThread = tx_thread(tx, tq)
+                    print("started txthread")
+                if rxThread == None:
+                    rxThread = rx_thread(rx)
+                    print("started rxthread")
+                elif rxThread.tstop:
+                    print("stopping transmission")
+                    txThread.stop_transmit()
+                    rxThread.tstop = False
+                arg = input("send some data or file: ")
+                if arg == "file":
+                    file = open("modules/tests/Shrek.txt")
+                    data = file.read()
+                    i = 0
+                    while i<len(data):
+                        packet = data[i:i+40]
+                        i += 40
+                        txThread.tq.put(packet)
 
-            time.sleep(10)
-        if state == 1:
-            if not txThread == None:
-                txThread.stop()
-                txThread = None
-            if not rxThread == None:
-                rxThread.stop()
-                rxThread = None
-            if not ack:
-                packet = None
-                while packet is None:
-                    print("attempting to set half duplex")
-                    tx.transmit(encoding.utf8encode("sethd"))
-                    packet,_,_ = tx.receive()
-                    if encoding.utf8decode(packet) == "hdack":
-                        ack = True
-            #start half duplex
-            halfDuplex(tx)
-        if state == 2:
-            if not txThread == None:
-                txThread.stop()
-                rxThread = None
-            if not rxThread == None:
-                rxThread.stop()
-                rxThread = None
-            rx.set_frequency(txFreq)
-            if not ack:
-                packet = None
-                while packet is None:
-                    print("attempting to set half duplex")
-                    rx.transmit(encoding.utf8encode("sethd"))
-                    packet,_,_ = rx.receive()
-                    if encoding.utf8decode(packet) == "hdack":
-                        ack = True
-            #start half duplex
-            halfDuplex(rx)
-        if state == 3:
-            print("no blueboxes found")
+                time.sleep(10)
+            case 1:
+                if not txThread == None:
+                    txThread.stop()
+                    txThread = None
+                if not rxThread == None:
+                    rxThread.stop()
+                    rxThread = None
+                if not ack:
+                    packet = None
+                    while packet is None:
+                        print("attempting to set half duplex")
+                        tx.transmit(encoding.utf8encode("sethd"))
+                        packet,_,_ = tx.receive()
+                        if encoding.utf8decode(packet) == "hdack":
+                            ack = True
+                #start half duplex
+                halfDuplex(tx)
+            case 2:
+                if not txThread == None:
+                    txThread.stop()
+                    rxThread = None
+                if not rxThread == None:
+                    rxThread.stop()
+                    rxThread = None
+                rx.set_frequency(txFreq)
+                if not ack:
+                    packet = None
+                    while packet is None:
+                        print("attempting to set half duplex")
+                        rx.transmit(encoding.utf8encode("sethd"))
+                        packet,_,_ = rx.receive()
+                        if encoding.utf8decode(packet) == "hdack":
+                            ack = True
+                #start half duplex
+                halfDuplex(rx)
+            case 3:
+                print("no blueboxes found")
 
