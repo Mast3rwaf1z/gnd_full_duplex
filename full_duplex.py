@@ -44,7 +44,7 @@ class dualBB_handler():
         if tx == None:
             tx = self.tx
         if self.tq.size > 0:
-            data = encoding.utf8encode(self.tq.pull())
+            data = encoding.utf8encode(self.tq.dequeue())
             tx.transmit(data)
     
     #function to receive data from a satellite
@@ -80,7 +80,7 @@ class HDThread(threading.Thread):
         print("Half duplex thread started")
         while True:
             if self.tq.size > 0:
-                self.HDBB.transmit(encoding.utf8encode(self.tq.pull()))
+                self.HDBB.transmit(encoding.utf8encode(self.tq.dequeue()))
                 print("data sent")
             else:
                 print("queue empty")
@@ -148,4 +148,4 @@ if __name__ == "__main__":#some dummy testing to see if it works
     txThread = tx_thread(BBH, packet="ping from " + getpass.getuser() + '@' + socket.gethostname() + " using " + BBH.tx.serial)
     rxThread = rx_thread(BBH)
     while True:
-        BBH.tq.put(input("input some data for the queue: "))
+        BBH.tq.enqueue(input("input some data for the queue: "))

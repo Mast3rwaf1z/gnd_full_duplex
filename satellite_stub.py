@@ -1,5 +1,5 @@
 import time
-import bluebox as bb
+from bluebox import *
 from modules.data_structures import *
 import modules.encoding as encoding
 
@@ -11,7 +11,7 @@ rxFreq = 431200000
 packetcounter = 0
 tq = queue()
 
-def halfDuplex(bb:bb.Bluebox):
+def half_duplex(bb:Bluebox):
     data = None
     global packetcounter
     packetcounter += 1
@@ -29,7 +29,7 @@ def halfDuplex(bb:bb.Bluebox):
         print("transmitting a half duplex packet")
         bb.transmit(encoding.utf8encode("acknowledgement"))
 
-def bbcheck(tx:bb.Bluebox, rx:bb.Bluebox) -> int:
+def bbcheck(tx:Bluebox, rx:Bluebox) -> int:
     try:
         tx.get_frequency()
         try:
@@ -52,7 +52,7 @@ def bbcheck(tx:bb.Bluebox, rx:bb.Bluebox) -> int:
 if __name__ == "__main__":
     txThread = None
     rxThread = None
-    tx:bb.Bluebox = None
+    tx:Bluebox = None
     ack = False
     while tx == None:
         try:
@@ -63,7 +63,7 @@ if __name__ == "__main__":
             print(e)
             time.sleep(5)
             continue
-    rx:bb.Bluebox = None
+    rx:Bluebox = None
     while rx == None:
         try:
             #break
@@ -119,7 +119,7 @@ if __name__ == "__main__":
                         if encoding.utf8decode(packet) == "hdack":
                             ack = True
                 #start half duplex
-                halfDuplex(tx)
+                half_duplex(tx)
             case 2:
                 if not txThread == None:
                     txThread.stop()
@@ -137,7 +137,7 @@ if __name__ == "__main__":
                         if encoding.utf8decode(packet) == "hdack":
                             ack = True
                 #start half duplex
-                halfDuplex(rx)
+                half_duplex(rx)
             case 3:
                 print("no blueboxes found")
 

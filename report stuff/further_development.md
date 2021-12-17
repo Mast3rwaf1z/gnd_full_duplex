@@ -19,3 +19,9 @@ The project is not finished, what we have is a test environment that theoretical
 ## Research current encoding more thoroughly now that the deadline is gone
 -   With the project handed in, there is less pressure to implement complex goals of the semester and more time to research encoding.
     -   not entirely true since reed-solomon is relevant for algorithms :)
+
+## Half duplex is not finished
+-   my personal goal with half duplex is make sure it can do exactly the same as the current system, however there are some features missing
+    -   our system is unable to request data from the satellite and switch into a receiver mode until that is done
+    -   satellite stub is unable to process requests of specific data
+    
