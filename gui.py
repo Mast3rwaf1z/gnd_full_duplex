@@ -18,9 +18,9 @@ def exec_fd():
 def queue_text():
     global BBH
     if BBH is not None:
-        BBH.tq.put(e.get())
+        BBH.tq.enqueue(e.get())
         #for i in range(10):
-            #BBH.tq.put("test\n")
+            #BBH.tq.enqueue("test\n")
         textbox.config(text="successfully queued item", fg="green")
     else:
         textbox.config(text="ERROR: failed to queue item, is BBH initialized?", fg="red")
@@ -35,7 +35,7 @@ def queue_file():
                 data = ba[Index:Index+40]
                 Index += 40
                 print(data)
-                BBH.tq.put(data)
+                BBH.tq.enqueue(data)
         textbox.config(text="successfully queued file!", fg="green")
     else:
         filename = filed.askopenfilename(title="open a file", initialdir="~/aausat6/gnd_full_duplex/")
@@ -57,7 +57,7 @@ def get_queue():
 
 def stop_transmission():
     if BBH is not None:
-        BBH.tq.put("tstop")
+        BBH.tq.enqueue("tstop")
         textbox.config(text="successfully stopped transmission", fg="green")
     else:
         textbox.config(text="ERROR: failed to stop transmission, is it even initialized?", fg="red")

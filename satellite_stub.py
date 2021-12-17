@@ -100,7 +100,7 @@ if __name__ == "__main__":
                     while i<len(data):
                         packet = data[i:i+40]
                         i += 40
-                        txThread.tq.put(packet)
+                        txThread.tq.enqueue(packet)
 
                 time.sleep(10)
             case 1:
