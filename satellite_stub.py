@@ -11,7 +11,7 @@ rxFreq = 431200000
 packetcounter = 0
 tq = queue()
 
-def halfDuplex(bb:bb.Bluebox):
+def half_duplex(bb:bb.Bluebox):
     data = None
     global packetcounter
     packetcounter += 1
@@ -77,7 +77,6 @@ if __name__ == "__main__":
 
 
     while True:
-        state = bbcheck(tx, rx)
         match bbcheck(tx, rx):
             case 0:
                 rx.get_frequency()
@@ -119,7 +118,7 @@ if __name__ == "__main__":
                         if encoding.utf8decode(packet) == "hdack":
                             ack = True
                 #start half duplex
-                halfDuplex(tx)
+                half_duplex(tx)
             case 2:
                 if not txThread == None:
                     txThread.stop()
@@ -137,7 +136,7 @@ if __name__ == "__main__":
                         if encoding.utf8decode(packet) == "hdack":
                             ack = True
                 #start half duplex
-                halfDuplex(rx)
+                half_duplex(rx)
             case 3:
-                print("no blueboxes found")
+                print("ERROR: no blueboxes found")
 

@@ -76,7 +76,6 @@ class HDThread(threading.Thread):
         time.sleep(4)
         self.start()
     def run(self):
-        HMAC_LEN = 2
         print("Half duplex thread started")
         while True:
             if self.tq.size > 0:
@@ -85,13 +84,13 @@ class HDThread(threading.Thread):
             else:
                 print("queue empty")
             data = None
-            counter = 0     #the thought behind using a counter here is to interrupt the attempt to receive in case we missed the packet
+            timeouts = 0     #the thought behind using a counter here is to interrupt the attempt to receive in case we missed the packet
             while data is None:
-                counter += 1
-                if counter > 3: #it is allowed to timeout 3 times, the timeout is 10000 ms as initialized in the handler
+                timeouts += 1
+                if timeouts > 3: #it is allowed to timeout 3 times, the timeout is 10000 ms as initialized in the handler
                     break
                 data,_,_ = self.HDBB.receive()
-            if counter > 3: #this essentially does the same as exception handling, it restarts the loop if no packet is received
+            if timeouts > 3: #this essentially does the same as exception handling, it restarts the loop if no packet is received
                 continue
 
             print("received packet")

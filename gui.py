@@ -45,7 +45,7 @@ def queue_file():
             while Index<len(ba):
                 data = ba[Index:Index+40]
                 Index += 40
-                print(data)
+                print(data, sep=None)
         textbox.config(text="ERROR: failed to queue file, is BBH initialized?", fg="red")
 
 def get_queue():
@@ -75,7 +75,7 @@ exec_button = tk.Button(frame,
                    text="init full-duplex",
                    command=exec_fd)
 exec_button.pack(side=tk.LEFT)
-
+    
 queue_button = tk.Button(frame, text="queue", command=queue_text)
 queue_button.pack(side=tk.LEFT)
 
