@@ -33,7 +33,7 @@ class tx_thread(threading.Thread):
         while self.transmitting:
             if self.tq.size>0:
                 try:
-                    transmit(self.tx, self.tq.pull())
+                    transmit(self.tx, self.tq.dequeue())
                 except:
                     print("transmitter might have been disconnected, exiting")
                     return

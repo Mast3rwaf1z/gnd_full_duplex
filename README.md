@@ -15,7 +15,7 @@ Here lies the programs for the full duplex radio communication implementation fo
       ```
       You can install this software by issuing the following commands:
       ```console
-      $ git clone git@github:aausat/bbctl.git
+      $ git clone git@github.com:aausat/bbctl.git
       $ cd bbctl
       $ pip3 install -r requirements.txt --user
       ```
@@ -24,3 +24,15 @@ Here lies the programs for the full duplex radio communication implementation fo
 - The full_duplex.py program can run on any system with bbctl installed
 - The satellite_stub.py program has only been tested in Arch Linux
     -   The main purpose of this program is to test the capability of the full_duplex.py program
+
+The gnd software can be run by
+```console
+python3 gui.py
+```
+or by importing the handler in your program.
+
+The satellite stub for testing can be run directly by
+```console
+python3 satellite_stub.py
+```
+or by using the transmitter and receiver modules in your program
