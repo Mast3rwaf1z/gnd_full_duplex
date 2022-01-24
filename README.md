@@ -15,7 +15,7 @@ Here lies the programs for the full duplex radio communication implementation fo
       ```
       You can install this software by issuing the following commands:
       ```console
-      $ git clone git@github.com:aausat/bbctl.git
+      $ git clone https://github.com/aausat/bbctl.git
       $ cd bbctl
       $ pip3 install -r requirements.txt --user
       ```
